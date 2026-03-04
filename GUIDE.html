@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NEXUS AI — Full Deployment Guide · iaBRU-Web</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:Georgia,serif;max-width:900px;margin:40px auto;padding:0 28px 120px;background:#fff;color:#111;line-height:1.82}
+  h1{font-size:1.9rem;margin-bottom:4px}
+  h2{font-size:1.15rem;margin-top:56px;padding-bottom:9px;border-bottom:2.5px solid #111}
+  h3{font-size:1rem;margin-top:28px;margin-bottom:4px}
+  p{margin:10px 0}
+  code{background:#f0f0f0;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:.87rem;word-break:break-all}
+  pre{background:#f0f0f0;padding:16px 22px;border-radius:7px;overflow-x:auto;font-size:.81rem;line-height:1.7;border:1px solid #ddd}
+  ol,ul{padding-left:24px} li{margin:10px 0}
+  a{color:#0055cc}
+  table{border-collapse:collapse;width:100%;margin:16px 0;font-size:.87rem}
+  th{background:#111;color:#fff;padding:10px 14px;text-align:left}
+  td{padding:9px 14px;border-bottom:1px solid #e0e0e0;vertical-align:top}
+  tr:nth-child(even) td{background:#f8f8f8}
+  .good{border-left:5px solid #16a34a;padding:14px 18px;background:#f0fdf4;margin:16px 0;border-radius:0 8px 8px 0}
+  .warn{border-left:5px solid #d97706;padding:14px 18px;background:#fffbeb;margin:16px 0;border-radius:0 8px 8px 0}
+  .note{border-left:5px solid #2563eb;padding:14px 18px;background:#eff6ff;margin:16px 0;border-radius:0 8px 8px 0}
+  .err {border-left:5px solid #dc2626;padding:14px 18px;background:#fef2f2;margin:16px 0;border-radius:0 8px 8px 0}
+  .box {border:1px solid #ccc;border-radius:8px;padding:14px 18px;background:#fafafa;margin:14px 0}
+  .url{display:inline-block;background:#0f172a;color:#38bdf8;border-radius:5px;padding:3px 12px;font-family:monospace;font-size:.88rem;font-weight:700}
+  .env{display:inline-block;background:#fef9c3;color:#713f12;border-radius:5px;padding:2px 9px;font-family:monospace;font-size:.84rem;font-weight:700}
+  .val{display:inline-block;background:#dcfce7;color:#065f46;border-radius:5px;padding:2px 9px;font-family:monospace;font-size:.87rem;font-weight:700}
+  .go {display:inline-block;background:#dbeafe;color:#1e40af;border-radius:3px;padding:1px 7px;font-family:monospace;font-size:.72rem;font-weight:700;vertical-align:middle}
+  .py {display:inline-block;background:#dcfce7;color:#166534;border-radius:3px;padding:1px 7px;font-family:monospace;font-size:.72rem;font-weight:700;vertical-align:middle}
+  .js {display:inline-block;background:#fef9c3;color:#713f12;border-radius:3px;padding:1px 7px;font-family:monospace;font-size:.72rem;font-weight:700;vertical-align:middle}
+  .sn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:#111;color:#fff;border-radius:50%;font-size:.82rem;font-weight:700;margin-right:8px;vertical-align:middle}
+  .fe{background:#eff6ff;border-left:5px solid #3b82f6;padding:12px 18px;margin:10px 0;border-radius:0 8px 8px 0}
+  .be{background:#f0fdf4;border-left:5px solid #22c55e;padding:12px 18px;margin:10px 0;border-radius:0 8px 8px 0}
+  .ad{background:#fefce8;border-left:5px solid #f59e0b;padding:12px 18px;margin:10px 0;border-radius:0 8px 8px 0}
+  .muted{color:#666;font-size:.87rem}
+  hr{border:none;border-top:1px solid #e0e0e0;margin:44px 0}
+</style>
+</head>
+<body>
+
+<h1>&#9889; NEXUS AI &#8212; Deployment Guide</h1>
+<p style="color:#555;margin-top:2px;font-style:italic;font-size:.95rem">
+  GitHub: <strong>iaBRU-Web</strong> &nbsp;&#183;&nbsp; 3 repos &nbsp;&#183;&nbsp; 3 Vercel deployments &nbsp;&#183;&nbsp;
+  Go + Python + Node.js &nbsp;&#183;&nbsp; Permanent database in your own GitHub
+</p>
+
+<div class="good" style="margin-top:24px">
+  <p style="margin:0 0 10px 0"><strong>Your 3 live addresses (once deployed):</strong></p>
+  <table style="margin:0;font-size:.93rem">
+    <tr>
+      <td style="border:none;padding:5px 14px 5px 0;width:110px">&#127760; Frontend</td>
+      <td style="border:none;padding:5px 0"><span class="url">https://bru-gpt5.vercel.app</span> &nbsp;&#8592; share this with users</td>
+    </tr>
+    <tr>
+      <td style="border:none;padding:5px 14px 5px 0">&#9881;&#65039; Backend</td>
+      <td style="border:none;padding:5px 0"><span class="url">https://backend-bru.vercel.app</span> &nbsp;&#8592; the engine, not visited directly</td>
+    </tr>
+    <tr>
+      <td style="border:none;padding:5px 14px 5px 0">&#128274; Admin</td>
+      <td style="border:none;padding:5px 0"><span class="url">https://gpt5-admin.vercel.app</span> &nbsp;&#8592; only for you</td>
+    </tr>
+    <tr>
+      <td style="border:none;padding:5px 14px 5px 0">&#128451;&#65039; Database</td>
+      <td style="border:none;padding:5px 0"><span class="url">github.com/iaBRU-Web/nexus-ai-db</span> &nbsp;&#8592; your private repo</td>
+    </tr>
+  </table>
+</div>
+
+<hr/>
+<h2>How the 3 Deployments Connect</h2>
+<pre>
+User opens  --&gt;  bru-gpt5.vercel.app          (frontend: the chat UI)
+                      |
+                      |  every API call goes here (via NEXT_PUBLIC_API_URL)
+                      v
+                backend-bru.vercel.app         (backend: the brain)
+                  |-- /api/login        Go compiled function
+                  |-- /api/signup       Go compiled function
+                  |-- /api/enhance      Python function
+                  |-- /api/chat/send    Node.js, runs AI model
+                  |-- /api/chat/history Node.js, loads saved chats
+                  `-- /api/chat/clear   Node.js, deletes chats
+                              |
+                              v
+                  github.com/iaBRU-Web/nexus-ai-db   (your private database)
+                      |-- users.json
+                      `-- chats/
+                          |-- alice.json
+                          `-- bob.json
+
+You open    --&gt;  gpt5-admin.vercel.app         (admin panel: only for you)
+                      |  reads + writes same private database
+                      v
+                  github.com/iaBRU-Web/nexus-ai-db
+</pre>
+
+<hr/>
+<h2><span class="sn">1</span> Create 4 GitHub Repositories</h2>
+
+<p>Sign into <a href="https://github.com" target="_blank">github.com</a> as <strong>iaBRU-Web</strong>.
+Click the <strong>+</strong> icon top-right &#8594; <strong>New repository</strong> four times:</p>
+
+<table>
+  <tr><th>Repository name</th><th>Visibility</th><th>Add a README?</th><th>Why</th></tr>
+  <tr><td><code>nexus-frontend</code></td><td>Public</td><td>No &#8212; leave unticked</td><td>Frontend code</td></tr>
+  <tr><td><code>nexus-backend</code></td><td>Public</td><td>No &#8212; leave unticked</td><td>Backend + AI code</td></tr>
+  <tr><td><code>nexus-admin</code></td><td>Public</td><td>No &#8212; leave unticked</td><td>Admin panel code</td></tr>
+  <tr style="background:#fdf4ff"><td><strong><code>nexus-ai-db</code></strong></td><td><strong>&#9888;&#65039; Private</strong></td><td><strong>&#9888;&#65039; Yes &#8212; tick this</strong></td><td>Your permanent database</td></tr>
+</table>
+
+<div class="warn">
+  <strong>nexus-ai-db must be set to Private.</strong> It stores hashed passwords. Anyone who reads it could attempt to crack them.<br/><br/>
+  <strong>"Add a README file" must be ticked for nexus-ai-db.</strong> Without it the repo has no branch and the app cannot write files to it. The first signup will fail silently.
+</div>
+
+<hr/>
+<h2><span class="sn">2</span> Create a GitHub Personal Access Token</h2>
+
+<p>This lets your backend and admin apps write user data to your private <code>nexus-ai-db</code> repo.</p>
+<ol>
+  <li>Click your <strong>profile picture</strong> &#8594; <strong>Settings</strong></li>
+  <li>Scroll to the very bottom of the left sidebar &#8594; <strong>Developer settings</strong></li>
+  <li><strong>Personal access tokens</strong> &#8594; <strong>Tokens (classic)</strong></li>
+  <li><strong>Generate new token</strong> &#8594; <strong>Generate new token (classic)</strong></li>
+  <li>Note: <code>nexus-db-token</code> &nbsp; | &nbsp; Expiration: <strong>No expiration</strong></li>
+  <li>Scopes: tick the top checkbox labelled <strong>repo</strong> (ticks all sub-items automatically)</li>
+  <li>Click green <strong>Generate token</strong> button</li>
+  <li>A token appears starting with <code>ghp_</code> &#8212; <strong>copy it immediately, it shows only once</strong></li>
+</ol>
+<div class="warn">Paste it into a text file on your desktop right now. You will need it in Step 5.</div>
+
+<hr/>
+<h2>How to Upload Files to GitHub (read before Steps 3&#8211;5)</h2>
+<div class="box">
+  <strong>The process for every single file:</strong>
+  <ol style="margin:10px 0 0 0">
+    <li>Open the GitHub repository in your browser</li>
+    <li>Click <strong>Add file &#8594; Create new file</strong></li>
+    <li>In the filename box, type the exact path from the table (e.g. <code>pages/chat.js</code>)<br/>
+        When you type <strong>/</strong> GitHub creates the folder automatically</li>
+    <li>Open the matching file from your unzipped folder in any text editor<br/>
+        (Windows: Notepad &#8212; right-click the file &#8594; Open with &#8594; Notepad)<br/>
+        (Mac: TextEdit &#8212; right-click &#8594; Open with &#8594; TextEdit)</li>
+    <li>Ctrl+A (Win) or Cmd+A (Mac) to select all &#8594; Ctrl+C / Cmd+C to copy</li>
+    <li>Click inside GitHub's editor &#8594; Ctrl+V / Cmd+V to paste</li>
+    <li>Scroll down &#8594; click <strong>Commit new file</strong></li>
+    <li>Repeat for the next file</li>
+  </ol>
+</div>
+<div class="note">
+  <strong>Hidden files:</strong> Files starting with a dot (<code>.eslintrc.json</code>) may be invisible.<br/>
+  Windows: File Explorer &#8594; View &#8594; tick "Hidden items"<br/>
+  Mac: Finder &#8594; press Cmd + Shift + . (dot key)
+</div>
+
+<hr/>
+<h2><span class="sn">3</span> Upload Frontend Files</h2>
+<div class="fe">
+  <strong>Repo:</strong> <span class="url" style="font-size:.82rem">github.com/iaBRU-Web/nexus-frontend</span>
+  &nbsp;|&nbsp; <strong>Zip folder:</strong> <code>nexus-frontend/</code>
+</div>
+<table>
+  <tr><th>#</th><th>Type this path in GitHub's filename box</th><th>Lang</th></tr>
+  <tr><td>1</td><td><code>package.json</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>2</td><td><code>next.config.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>3</td><td><code>tailwind.config.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>4</td><td><code>postcss.config.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>5</td><td><code>.eslintrc.json</code> &nbsp;<span class="muted">(hidden file)</span></td><td>&#8212;</td></tr>
+  <tr><td>6</td><td><code>vercel.json</code></td><td>&#8212;</td></tr>
+  <tr><td>7</td><td><code>styles/globals.css</code></td><td>CSS</td></tr>
+  <tr><td>8</td><td><code>lib/helpers.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>9</td><td><code>pages/_app.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>10</td><td><code>pages/_document.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>11</td><td><code>pages/index.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>12</td><td><code>pages/login.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>13</td><td><code>pages/signup.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>14</td><td><code>pages/chat.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>15</td><td><code>components/AuthGuard.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>16</td><td><code>components/MessageBubble.js</code></td><td><span class="js">JS</span></td></tr>
+  <tr><td>17</td><td><code>components/TypingIndicator.js</code></td><td><span class="js">JS</span></td></tr>
+</table>
+
+<hr/>
+<h2><span class="sn">4</span> Upload Backend Files</h2>
+<div class="be">
+  <strong>Repo:</strong> <span class="url" style="font-size:.82rem">github.com/iaBRU-Web/nexus-backend</span>
+  &nbsp;|&nbsp; <strong>Zip folder:</strong> <code>nexus-backend/</code>
+</div>
+<table>
+  <tr><th>#</th><th>Type this path in GitHub's filename box</th><th>Lang</th><th>Note</th></tr>
+  <tr><td>1</td><td><code>package.json</code></td><td><span class="js">JS</span></td><td></td></tr>
+  <tr><td>2</td><td><code>next.config.js</code></td><td><span class="js">JS</span></td><td></td></tr>
+  <tr><td>3</td><td><code>.eslintrc.json</code></td><td>&#8212;</td><td>Hidden file</td></tr>
+  <tr><td>4</td><td><code>vercel.json</code></td><td>&#8212;</td><td>Configures Go + Python + Node runtimes</td></tr>
+  <tr><td>5</td><td><code>go.mod</code></td><td><span class="go">Go</span></td><td>Vercel reads this to compile Go files</td></tr>
+  <tr><td>6</td><td><code>requirements.txt</code></td><td><span class="py">Py</span></td><td>Vercel reads this for Python runtime</td></tr>
+  <tr><td>7</td><td><code>api/login/index.go</code></td><td><span class="go">Go</span></td><td>Login &#8212; compiled by Vercel automatically</td></tr>
+  <tr><td>8</td><td><code>api/signup/index.go</code></td><td><span class="go">Go</span></td><td>Signup &#8212; compiled by Vercel automatically</td></tr>
+  <tr><td>9</td><td><code>api/enhance/index.py</code></td><td><span class="py">Py</span></td><td>AI response cleanup &#8212; run by Vercel automatically</td></tr>
+  <tr><td>10</td><td><code>lib/auth.js</code></td><td><span class="js">JS</span></td><td>Token verification</td></tr>
+  <tr><td>11</td><td><code>lib/github-db.js</code></td><td><span class="js">JS</span></td><td>Your GitHub database layer</td></tr>
+  <tr><td>12</td><td><code>lib/helpers.js</code></td><td><span class="js">JS</span></td><td>Utility functions</td></tr>
+  <tr><td>13</td><td><code>pages/_app.js</code></td><td><span class="js">JS</span></td><td>Next.js requires this</td></tr>
+  <tr><td>14</td><td><code>pages/index.js</code></td><td><span class="js">JS</span></td><td>Shows backend is alive</td></tr>
+  <tr><td>15</td><td><code>pages/api/status.js</code></td><td><span class="js">JS</span></td><td>Health check endpoint</td></tr>
+  <tr><td>16</td><td><code>pages/api/chat/send.js</code></td><td><span class="js">JS</span></td><td>AI inference &#8212; runs the models</td></tr>
+  <tr><td>17</td><td><code>pages/api/chat/history.js</code></td><td><span class="js">JS</span></td><td>Load saved conversations</td></tr>
+  <tr><td>18</td><td><code>pages/api/chat/clear.js</code></td><td><span class="js">JS</span></td><td>Delete conversations</td></tr>
+</table>
+
+<hr/>
+<h2><span class="sn">5</span> Upload Admin Files</h2>
+<div class="ad">
+  <strong>Repo:</strong> <span class="url" style="font-size:.82rem">github.com/iaBRU-Web/nexus-admin</span>
+  &nbsp;|&nbsp; <strong>Zip folder:</strong> <code>nexus-admin/</code>
+</div>
+<table>
+  <tr><th>#</th><th>Type this path in GitHub's filename box</th><th>What it does</th></tr>
+  <tr><td>1</td><td><code>package.json</code></td><td>Dependencies</td></tr>
+  <tr><td>2</td><td><code>next.config.js</code></td><td>Next.js config</td></tr>
+  <tr><td>3</td><td><code>tailwind.config.js</code></td><td>CSS config</td></tr>
+  <tr><td>4</td><td><code>postcss.config.js</code></td><td>CSS processing</td></tr>
+  <tr><td>5</td><td><code>.eslintrc.json</code></td><td>Lint rules (hidden file)</td></tr>
+  <tr><td>6</td><td><code>vercel.json</code></td><td>Vercel config</td></tr>
+  <tr><td>7</td><td><code>styles/globals.css</code></td><td>Admin panel styles</td></tr>
+  <tr><td>8</td><td><code>lib/auth.js</code></td><td>Admin PIN check</td></tr>
+  <tr><td>9</td><td><code>lib/github-db.js</code></td><td>Database read/delete access</td></tr>
+  <tr><td>10</td><td><code>pages/_app.js</code></td><td>App wrapper</td></tr>
+  <tr><td>11</td><td><code>pages/index.js</code></td><td>Redirect to /admin</td></tr>
+  <tr><td>12</td><td><code>pages/admin/index.js</code></td><td>Full admin dashboard UI</td></tr>
+  <tr><td>13</td><td><code>pages/api/admin/users.js</code></td><td>API: list and delete users</td></tr>
+  <tr><td>14</td><td><code>pages/api/admin/chats.js</code></td><td>API: view and clear chats</td></tr>
+  <tr><td>15</td><td><code>pages/api/admin/stats.js</code></td><td>API: overall stats</td></tr>
+</table>
+
+<hr/>
+<h2><span class="sn">6</span> Deploy Backend on Vercel &#8212; Do This First</h2>
+<div class="warn"><strong>Backend must be deployed before frontend.</strong> You need its live URL to configure the frontend env var.</div>
+<ol>
+  <li>Go to <a href="https://vercel.com" target="_blank">vercel.com</a> &#8594; sign in with GitHub as iaBRU-Web</li>
+  <li>Click <strong>Add New&#8230; &#8594; Project</strong></li>
+  <li>Find <strong>nexus-backend</strong> in the list &#8594; click <strong>Import</strong></li>
+  <li>Find <strong>Project Name</strong> near the top &#8594; change it to <span class="val" style="font-size:.95rem;padding:3px 12px">backend-bru</span></li>
+  <li>Scroll to <strong>Environment Variables</strong> &#8594; add these 4 rows:</li>
+</ol>
+<table>
+  <tr><th>Name &#8212; type exactly</th><th>Value &#8212; type exactly</th></tr>
+  <tr>
+    <td><span class="env">GITHUB_DB_TOKEN</span></td>
+    <td>Your <code>ghp_&#8230;</code> token from Step 2</td>
+  </tr>
+  <tr>
+    <td><span class="env">GITHUB_DB_REPO</span></td>
+    <td><span class="val">iaBRU-Web/nexus-ai-db</span></td>
+  </tr>
+  <tr>
+    <td><span class="env">TOKEN_SECRET</span></td>
+    <td>Invent a long random string &#8212; e.g. <code>bruGPT_secret_2025_xKq9</code><br/><span class="muted">Write it down. Never change after first user signs up.</span></td>
+  </tr>
+  <tr>
+    <td><span class="env">PASSWORD_SALT</span></td>
+    <td>Invent a different random string &#8212; e.g. <code>bruGPT_salt_2025_mTz7</code><br/><span class="muted">Write it down. Never change after first user signs up.</span></td>
+  </tr>
+</table>
+<ol start="6">
+  <li>Click <strong>Deploy</strong> &#8594; wait ~2 minutes</li>
+  <li>Test it: open <a href="https://backend-bru.vercel.app/api/status" target="_blank"><strong>https://backend-bru.vercel.app/api/status</strong></a><br/>
+      You should see: <code>{"status":"nexus-backend online",...}</code></li>
+</ol>
+
+<hr/>
+<h2><span class="sn">7</span> Deploy Frontend on Vercel</h2>
+<ol>
+  <li>Click <strong>Add New&#8230; &#8594; Project</strong></li>
+  <li>Find <strong>nexus-frontend</strong> &#8594; click <strong>Import</strong></li>
+  <li>Change Project Name to <span class="val" style="font-size:.95rem;padding:3px 12px">bru-gpt5</span></li>
+  <li>Add this environment variable:</li>
+</ol>
+<table>
+  <tr><th>Name &#8212; type exactly</th><th>Value &#8212; type exactly</th></tr>
+  <tr>
+    <td><span class="env">NEXT_PUBLIC_API_URL</span></td>
+    <td><span class="val">https://backend-bru.vercel.app</span><br/><span class="muted">No trailing slash. This is how the frontend finds the backend.</span></td>
+  </tr>
+</table>
+<ol start="5">
+  <li>Click <strong>Deploy</strong></li>
+  <li>Test: open <a href="https://bru-gpt5.vercel.app" target="_blank"><strong>https://bru-gpt5.vercel.app</strong></a> &#8212; the NEXUS AI login page should appear</li>
+</ol>
+
+<hr/>
+<h2><span class="sn">8</span> Deploy Admin on Vercel</h2>
+<ol>
+  <li>Click <strong>Add New&#8230; &#8594; Project</strong></li>
+  <li>Find <strong>nexus-admin</strong> &#8594; click <strong>Import</strong></li>
+  <li>Change Project Name to <span class="val" style="font-size:.95rem;padding:3px 12px">gpt5-admin</span></li>
+  <li>Add these environment variables:</li>
+</ol>
+<table>
+  <tr><th>Name &#8212; type exactly</th><th>Value &#8212; type exactly</th></tr>
+  <tr>
+    <td><span class="env">GITHUB_DB_TOKEN</span></td>
+    <td>Same <code>ghp_&#8230;</code> token from Step 2</td>
+  </tr>
+  <tr>
+    <td><span class="env">GITHUB_DB_REPO</span></td>
+    <td><span class="val">iaBRU-Web/nexus-ai-db</span></td>
+  </tr>
+  <tr>
+    <td><span class="env">ADMIN_PIN</span></td>
+    <td>Invent a secret PIN &#8212; e.g. <code>BruAdmin2025!</code><br/><span class="muted">You type this every time you open the admin panel.</span></td>
+  </tr>
+</table>
+<ol start="5">
+  <li>Click <strong>Deploy</strong></li>
+  <li>Test: open <a href="https://gpt5-admin.vercel.app" target="_blank"><strong>https://gpt5-admin.vercel.app</strong></a> &#8212; the PIN login screen should appear</li>
+</ol>
+
+<hr/>
+<h2><span class="sn">9</span> Test Everything End to End</h2>
+<h3>As a user</h3>
+<ol>
+  <li>Visit <a href="https://bru-gpt5.vercel.app/signup" target="_blank">https://bru-gpt5.vercel.app/signup</a></li>
+  <li>Create an account &#8212; any username (3&#8211;32 chars) and password (min 6)</li>
+  <li>After signup you land on the chat page &#8212; type a message and press Enter</li>
+  <li><strong>First response: 15&#8211;30 seconds</strong> &#8212; the AI model (up to 1.5 GB) is downloading. Normal. Every message after is faster.</li>
+  <li>Use the model picker in the top-right to switch between 6 AI models</li>
+</ol>
+<h3>Confirm database is storing data</h3>
+<ol>
+  <li>Go to <a href="https://github.com/iaBRU-Web/nexus-ai-db" target="_blank">github.com/iaBRU-Web/nexus-ai-db</a></li>
+  <li>A <code>users.json</code> file should appear &#8212; open it to see your account</li>
+  <li>After chatting, a <code>chats/</code> folder appears with your conversations</li>
+</ol>
+<h3>As admin</h3>
+<ol>
+  <li>Visit <a href="https://gpt5-admin.vercel.app" target="_blank">https://gpt5-admin.vercel.app</a> &#8594; enter your ADMIN_PIN</li>
+  <li>You should see stats and your user in the list</li>
+  <li>Click a user to see their conversations, clear their chats, or delete the account</li>
+</ol>
+
+<hr/>
+<h2>All Environment Variables &#8212; Full Reference</h2>
+<table>
+  <tr><th>Variable</th><th>bru-gpt5 (frontend)</th><th>backend-bru (backend)</th><th>gpt5-admin (admin)</th></tr>
+  <tr><td><span class="env">GITHUB_DB_TOKEN</span></td><td style="color:#999;text-align:center">&#8212;</td><td>&#9989; your ghp_&#8230;</td><td>&#9989; same ghp_&#8230;</td></tr>
+  <tr><td><span class="env">GITHUB_DB_REPO</span></td><td style="color:#999;text-align:center">&#8212;</td><td>&#9989; <span class="val">iaBRU-Web/nexus-ai-db</span></td><td>&#9989; <span class="val">iaBRU-Web/nexus-ai-db</span></td></tr>
+  <tr><td><span class="env">TOKEN_SECRET</span></td><td style="color:#999;text-align:center">&#8212;</td><td>&#9989; your invented string</td><td style="color:#999;text-align:center">&#8212;</td></tr>
+  <tr><td><span class="env">PASSWORD_SALT</span></td><td style="color:#999;text-align:center">&#8212;</td><td>&#9989; your invented string</td><td style="color:#999;text-align:center">&#8212;</td></tr>
+  <tr><td><span class="env">NEXT_PUBLIC_API_URL</span></td><td>&#9989; <span class="val">https://backend-bru.vercel.app</span></td><td style="color:#999;text-align:center">&#8212;</td><td style="color:#999;text-align:center">&#8212;</td></tr>
+  <tr><td><span class="env">ADMIN_PIN</span></td><td style="color:#999;text-align:center">&#8212;</td><td style="color:#999;text-align:center">&#8212;</td><td>&#9989; your invented PIN</td></tr>
+</table>
+
+<hr/>
+<h2>Your Live URLs &#8212; Save These</h2>
+<table>
+  <tr><th>What</th><th>URL</th><th>Use</th></tr>
+  <tr><td>App for users</td><td><a href="https://bru-gpt5.vercel.app" target="_blank">https://bru-gpt5.vercel.app</a></td><td>Share this link</td></tr>
+  <tr><td>Backend check</td><td><a href="https://backend-bru.vercel.app/api/status" target="_blank">https://backend-bru.vercel.app/api/status</a></td><td>Confirm backend is alive</td></tr>
+  <tr><td>Admin panel</td><td><a href="https://gpt5-admin.vercel.app" target="_blank">https://gpt5-admin.vercel.app</a></td><td>Only for you &#8212; enter PIN</td></tr>
+  <tr><td>Your database</td><td><a href="https://github.com/iaBRU-Web/nexus-ai-db" target="_blank">github.com/iaBRU-Web/nexus-ai-db</a></td><td>Raw data &#8212; private repo, only you can see</td></tr>
+</table>
+
+<hr/>
+<h2>Common Problems</h2>
+
+<div class="err">
+  <strong>Login gives "Network error" or just spins forever</strong><br/>
+  The <span class="env">NEXT_PUBLIC_API_URL</span> on the frontend is wrong or was not saved.<br/>
+  Fix: Vercel &#8594; <strong>bru-gpt5</strong> &#8594; Settings &#8594; Environment Variables &#8594; check the value is exactly
+  <span class="val">https://backend-bru.vercel.app</span> (no trailing slash).<br/>
+  Then: Deployments tab &#8594; click &#8943; on latest deployment &#8594; <strong>Redeploy</strong>.
+</div>
+
+<div class="err">
+  <strong>"Database read failed" on login or signup</strong><br/>
+  <span class="env">GITHUB_DB_TOKEN</span> is wrong/expired, or <span class="env">GITHUB_DB_REPO</span> is wrong format.<br/>
+  Fix: Vercel &#8594; <strong>backend-bru</strong> &#8594; Settings &#8594; Environment Variables.<br/>
+  Repo must be exactly <span class="val">iaBRU-Web/nexus-ai-db</span> &#8212; no https://, no github.com.
+</div>
+
+<div class="err">
+  <strong>Vercel won't let me name the project "bru-gpt5" or "backend-bru"</strong><br/>
+  Vercel project names are globally unique. If taken, try <code>bru-gpt5-ai</code> or <code>backend-bru-app</code>.<br/>
+  If you use a different backend name, update <span class="env">NEXT_PUBLIC_API_URL</span> on the frontend to match.
+</div>
+
+<div class="err">
+  <strong>Backend build failed &#8212; Go compile error</strong><br/>
+  Ensure <code>go.mod</code> is in the root of nexus-backend (not in a subfolder).<br/>
+  Its content must be exactly two lines:<br/>
+  <pre style="margin:8px 0 0 0">module nexus-backend
+
+go 1.21</pre>
+  Also: <code>api/login/index.go</code> must be in its own <code>api/login/</code> folder,
+  and <code>api/signup/index.go</code> in <code>api/signup/</code>. They must NOT be in the same folder.
+</div>
+
+<div class="err">
+  <strong>First AI message never comes back</strong><br/>
+  Normal &#8212; the model (600 MB &#8211; 1.5 GB) downloads on first use. Wait up to 60 s and retry.
+  Once downloaded it stays cached for the session.
+</div>
+
+<div class="err">
+  <strong>Admin says "Unauthorized"</strong><br/>
+  The PIN must exactly match <span class="env">ADMIN_PIN</span> in Vercel &#8594; gpt5-admin &#8594; Settings.
+  Check capitalisation and no extra spaces.
+</div>
+
+<hr/>
+<h2>How to See Error Logs</h2>
+<ol>
+  <li>Vercel &#8594; click the failing project</li>
+  <li><strong>Deployments</strong> tab &#8594; click the latest deployment</li>
+  <li><strong>Functions</strong> tab &#8594; click the function name (e.g. <code>pages/api/chat/send</code>)</li>
+  <li>Real-time logs appear showing the actual error</li>
+</ol>
+
+<hr/>
+<h2>The 6 AI Models</h2>
+<table>
+  <tr><th>Model</th><th>By</th><th>Size</th><th>Best for</th></tr>
+  <tr><td>&#11088; Phi-2 (default)</td><td>Microsoft</td><td>1.3 GB</td><td>Best overall reasoning</td></tr>
+  <tr><td>&#128161; Phi-1.5</td><td>Microsoft</td><td>1.3 GB</td><td>Code and logic</td></tr>
+  <tr><td>&#128293; Qwen 1.8B</td><td>Alibaba</td><td>1.1 GB</td><td>Q&amp;A and analysis</td></tr>
+  <tr><td>&#9889; SmolLM2</td><td>HuggingFace</td><td>1 GB</td><td>Fast general chat</td></tr>
+  <tr><td>&#127758; Gemma 2B</td><td>Google</td><td>1.5 GB</td><td>Versatile tasks</td></tr>
+  <tr><td>&#128640; TinyLlama</td><td>Meta</td><td>600 MB</td><td>Fastest cold start</td></tr>
+</table>
+
+<hr/>
+<p style="color:#999;font-size:.82rem;text-align:center">
+  NEXUS AI &#183; iaBRU-Web &#183; bru-gpt5.vercel.app &#183; backend-bru.vercel.app &#183; gpt5-admin.vercel.app<br/>
+  Database: github.com/iaBRU-Web/nexus-ai-db &#183; 8 bugs fixed &#183; Zero API keys &#183; Zero paid services
+</p>
+</body>
+</html>
