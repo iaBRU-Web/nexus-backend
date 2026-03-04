@@ -1,0 +1,20 @@
+{
+  "functions": {
+    "pages/api/chat/send.js":    { "memory": 3008, "maxDuration": 60 },
+    "pages/api/chat/history.js": { "maxDuration": 15 },
+    "pages/api/chat/clear.js":   { "maxDuration": 15 },
+    "api/login/index.go":        { "maxDuration": 15 },
+    "api/signup/index.go":       { "maxDuration": 15 },
+    "api/enhance/index.py":      { "maxDuration": 15 }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin",  "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type,Authorization" }
+      ]
+    }
+  ]
+}
