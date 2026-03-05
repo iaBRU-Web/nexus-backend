@@ -1,23 +1,22 @@
 /**
  * pages/api/chat/send.js  — AI inference
- * BUG FIX #5: Python enhance logic inlined as JS — no self-HTTP call (unreliable on Vercel)
- * All 6 models supported. Saves to GitHub DB. CORS headers for cross-repo frontend.
+ * Using @xenova/transformers with small models only (TinyLlama 1.1B, SmolLM2 360M)
+ * to stay under Vercel Hobby 2048MB memory limit.
  */
 
 import { authFromHeader } from "../../../lib/auth";
 import { getConversation, saveConversation } from "../../../lib/github-db";
 import { generateId, generateConvTitle } from "../../../lib/helpers";
+import { pipeline, env } from "@xenova/transformers";
 
-// ── CORS — required because frontend is a different Vercel deployment ─────────
+// ── CORS ──────────────────────────────────────────────────────────────────────
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin",  "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
 }
 
-// ── Model registry ─────────────────────────────────────────────────────────────
-// Only models under ~1.2B params are kept — larger models (phi-2, phi-1_5,
-// qwen-1.8b, gemma-2b) all exceed Vercel Hobby's 2048 MB serverless limit.
+// ── Model registry (small models only — stay under 2048MB) ───────────────────
 const MODELS = {
   "tinyllama": { id:"Xenova/TinyLlama-1.1B-Chat-v1.0", label:"TinyLlama", format:"chatml" },
   "smollm2":   { id:"Xenova/SmolLM2-360M-Instruct",    label:"SmolLM2",   format:"chatml" },
@@ -25,8 +24,10 @@ const MODELS = {
 const DEFAULT_MODEL = "tinyllama";
 const pipeCache = {};
 
-// ── Prompt builder (chatml format — used by TinyLlama & SmolLM2) ─────────────
-function buildPrompt(format, history, message) {
+env.cacheDir = "/tmp/.cache/transformers";
+
+// ── Prompt builder ────────────────────────────────────────────────────────────
+function buildPrompt(history, message) {
   const sys = "You are NEXUS, a highly capable and accurate AI assistant. Give clear, well-structured, honest answers. Use Markdown where appropriate.";
   const recent = history.slice(-8);
   let p = `<|system|>\n${sys}</s>\n`;
@@ -43,12 +44,9 @@ function cleanOutput(text) {
   return out.trim() || "I'm not sure how to answer that. Could you rephrase?";
 }
 
-// ── BUG FIX #5: Inline enhance — no HTTP self-call ───────────────────────────
 function enhanceInline(text) {
   if (!text?.trim()) return { enhanced: text, quality: 0.3, changes: [] };
   const changes = [];
-
-  // Remove repeated sentences (Jaccard similarity)
   const sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
   if (sentences.length > 1) {
     const kept = [];
@@ -65,11 +63,7 @@ function enhanceInline(text) {
     const deduped = kept.join(" ");
     if (deduped !== text) { text = deduped; changes.push("removed_repetition"); }
   }
-
-  // Clean trailing whitespace and excess blank lines
   text = text.replace(/\n{3,}/g, "\n\n").replace(/[ \t]+$/gm, "").trim();
-
-  // Quality score
   let quality = 0.5;
   if (text.length > 100) quality += 0.1;
   if (text.length > 300) quality += 0.1;
@@ -77,7 +71,6 @@ function enhanceInline(text) {
   if (/^[\-\*]\s/m.test(text)) quality += 0.05;
   if (text.includes("`")) quality += 0.05;
   quality = Math.min(Math.max(Math.round(quality * 100) / 100, 0), 1);
-
   return { enhanced: text, quality, changes };
 }
 
@@ -96,8 +89,6 @@ export default async function handler(req, res) {
   const modelDef = MODELS[modelKey] || MODELS[DEFAULT_MODEL];
 
   try {
-    const { pipeline, env } = await import("@xenova/transformers");
-    env.cacheDir = "/tmp/.cache/transformers";
     if (!pipeCache[modelKey]) {
       pipeCache[modelKey] = await pipeline("text-generation", modelDef.id);
     }
@@ -109,7 +100,7 @@ export default async function handler(req, res) {
 
     messages.push({ id: generateId(), role:"user", content: message.trim(), timestamp: new Date().toISOString() });
 
-    const output = await pipe(buildPrompt(modelDef.format, messages, message.trim()), {
+    const output = await pipe(buildPrompt(messages, message.trim()), {
       max_new_tokens: 150, temperature: 0.72,
       repetition_penalty: 1.15, do_sample: true, return_full_text: false,
     });
